@@ -25,23 +25,25 @@ subprojects {
 }
 
 allprojects {
-    group = "obsidian.lib"
+    group   = "obsidian.lib"
     version = "1.0.0"
 }
 
 dependencies {
-    testImplementation(platform(libs.junit))
-    testImplementation(libs.junitjupiter)
+    testImplementation  (platform(libs.junit))
+    testImplementation  (libs.junitjupiter)
 
-    compileOnly(libs.lombok)
-    annotationProcessor(libs.lombok)
+    compileOnly         (libs.lombok)
+    annotationProcessor (libs.lombok)
 
-    implementation(libs.gson)
-    implementation(libs.annotations)
-    implementation(libs.yaml)
+    implementation      (libs.gson)
+    implementation      (libs.yaml)
 
-    implementation(project(":obsidian-configuration"))
-    implementation(project(":obsidian-reflection"))
+    implementation      (libs.annotations)
+
+    implementation      (project(":obsidian-configuration"))
+    implementation      (project(":obsidian-reflection")   )
+    implementation      (project(":obsidian-promise")      )
 }
 
 tasks.test {
@@ -68,8 +70,8 @@ mavenPublishing {
 
         licenses {
             license {
-                name.set("GNU General Public License v3.0")
-                url.set("https://www.gnu.org/licenses/gpl-3.0.html")
+                name.set("Apache License 2.0")
+                url.set("https://www.apache.org/licenses/LICENSE-2.0")
                 distribution.set("repo")
             }
         }
