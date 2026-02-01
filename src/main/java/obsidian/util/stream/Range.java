@@ -22,10 +22,20 @@ import org.jetbrains.annotations.NotNull;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 
+/**
+ * Utility class that provides static methods to generate ranges of integers and longs.
+ * The class is designed for creating sequences with specific start, end, and step values.
+ * It supports both ascending and descending ranges, depending on the input values.
+ * <p>
+ * The methods in this class return immutable instances of {@code Sequence} representing the generated ranges.
+ * <p>
+ * Note: This class cannot be instantiated as it only contains static methods.
+ *
+ * @see Sequence
+ */
 public final class Range {
     private Range() {}
 
-    @Contract("_, _, _ -> new")
     public static @NotNull Sequence<Integer> intRange(int start, int end, int step) {
         if (step == 0) throw new IllegalArgumentException("step cannot be 0");
 

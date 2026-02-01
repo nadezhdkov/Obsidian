@@ -1,71 +1,49 @@
 plugins {
-    id("java")
+    id("java-library")
     id("com.vanniktech.maven.publish") version "0.34.0"
     id("signing")
-}
-
-group = "obsidian.lib"
-version = "1.0.0"
-
-java {
-    withSourcesJar()
-    withJavadocJar()
 }
 
 repositories {
     mavenCentral()
 }
 
-subprojects {
-    apply(plugin = "java")
-
-    repositories {
-        mavenCentral()
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(21))
     }
-}
-
-allprojects {
-    group   = "obsidian.lib"
-    version = "1.0.0"
-}
-
-dependencies {
-    testImplementation  (platform(libs.junit))
-    testImplementation  (libs.junitjupiter)
-
-    compileOnly         (libs.lombok)
-    annotationProcessor (libs.lombok)
-
-    implementation      (libs.gson)
-    implementation      (libs.yaml)
-
-    implementation      (libs.annotations)
-
-    implementation      (project(":obsidian-configuration"))
-    implementation      (project(":obsidian-reflection")   )
-    implementation      (project(":obsidian-promise")      )
 }
 
 tasks.test {
     useJUnitPlatform()
 }
 
+tasks.matching { it.name == "generateMetadataFileForMavenPublication" }.configureEach {
+    dependsOn(tasks.matching { it.name == "plainJavadocJar" })
+    dependsOn(tasks.matching { it.name == "plainSourcesJar" })
+}
+
+dependencies {
+    implementation(libs.annotations)
+
+    testImplementation(platform(libs.junitBom))
+    testImplementation(libs.junitJupiter)
+}
+
 mavenPublishing {
+    publishToMavenCentral()
+    signAllPublications()
 
     coordinates(
-        group.toString(),
+        project.group.toString(),
         "obsidian",
-        version.toString()
+        project.version.toString()
     )
 
     pom {
         name.set("Obsidian")
-        description.set(
-            "Obsidian é uma biblioteca Java modular focada em produtividade, reflexão avançada, configuração dinâmica e utilitários modernos."
-        )
-
+        description.set("Obsidian is a modern, modular Java framework focused on developer ergonomics, offering advanced reflection, flexible configuration, concurrency abstractions, and high-quality utility APIs.")
         inceptionYear.set("2026")
-
         url.set("https://github.com/nadezhdkov/Obsidian")
 
         licenses {
@@ -88,6 +66,80 @@ mavenPublishing {
             url.set("https://github.com/nadezhdkov/Obsidian")
             connection.set("scm:git:https://github.com/nadezhdkov/Obsidian.git")
             developerConnection.set("scm:git:ssh://git@github.com/nadezhdkov/Obsidian.git")
+        }
+    }
+}
+
+subprojects {
+    apply(plugin = "java-library")
+    apply(plugin = "com.vanniktech.maven.publish")
+    apply(plugin = "signing")
+
+    repositories {
+        mavenCentral()
+    }
+
+    java {
+        toolchain {
+            languageVersion.set(JavaLanguageVersion.of(21))
+        }
+    }
+
+    tasks.withType<Test>().configureEach {
+        useJUnitPlatform()
+    }
+
+    tasks.matching { it.name == "generateMetadataFileForMavenPublication" }.configureEach {
+        dependsOn(tasks.matching { it.name == "plainJavadocJar" })
+        dependsOn(tasks.matching { it.name == "plainSourcesJar" })
+    }
+
+    dependencies {
+        testImplementation(platform(rootProject.libs.junitBom))
+        testImplementation(rootProject.libs.junitJupiter)
+
+        compileOnly(rootProject.libs.lombok)
+        annotationProcessor(rootProject.libs.lombok)
+
+        implementation(rootProject.libs.annotations)
+    }
+
+    mavenPublishing {
+        publishToMavenCentral()
+        signAllPublications()
+
+        coordinates(
+            project.group.toString(),
+            project.name,
+            project.version.toString()
+        )
+
+        pom {
+            name.set("Obsidian - ${project.name}")
+            description.set("Obsidian module: ${project.name}.")
+            url.set("https://github.com/nadezhdkov/Obsidian")
+
+            licenses {
+                license {
+                    name.set("Apache License 2.0")
+                    url.set("https://www.apache.org/licenses/LICENSE-2.0")
+                    distribution.set("repo")
+                }
+            }
+
+            developers {
+                developer {
+                    id.set("nadezhdkov")
+                    name.set("Nadezhdkov")
+                    url.set("https://github.com/nadezhdkov")
+                }
+            }
+
+            scm {
+                url.set("https://github.com/nadezhdkov/Obsidian")
+                connection.set("scm:git:https://github.com/nadezhdkov/Obsidian.git")
+                developerConnection.set("scm:git:ssh://git@github.com/nadezhdkov/Obsidian.git")
+            }
         }
     }
 }

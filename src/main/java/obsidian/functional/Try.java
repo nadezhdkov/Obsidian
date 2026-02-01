@@ -32,27 +32,120 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 /**
- * The {@code Try} class represents a computation that may either result in a successful value
- * or a failure (represented by a {@code Throwable}).
- * It provides an abstraction for error handling, avoiding the need for explicit
- * try-catch blocks.
+ * Represents a computation that may either succeed with a value ({@link Success})
+ * or fail with a {@link Throwable} ({@link Failure}).
  *
- * @param <T> The type of the value held by {@code Try} in the case of success.
+ * <h2>Overview</h2>
+ * {@code Try} is a functional error-handling container designed to replace explicit
+ * {@code try/catch} blocks in fluent pipelines.
+ *
+ * <p>
+ * A {@code Try<T>} instance is always in exactly one of two states:
+ * <ul>
+ *   <li>{@link Success} — contains a value (may be {@code null}, depending on how it was created)</li>
+ *   <li>{@link Failure} — contains an error ({@link Throwable})</li>
+ * </ul>
+ *
+ * <h2>Why use Try?</h2>
+ * {@code Try} makes it easy to:
+ * <ul>
+ *   <li>chain computations ({@link #map(Function)}, {@link #flatMap(Function)})</li>
+ *   <li>recover from failures ({@link #recover(Function)}, {@link #recoverWith(Function)})</li>
+ *   <li>execute side effects safely ({@link #andThen(Consumer)}, {@link #peek(Consumer)})</li>
+ *   <li>bridge back into exceptions when needed ({@link #getOrThrow(Function)}, {@link #checkedGet()})</li>
+ * </ul>
+ *
+ * <h2>Try vs Optional</h2>
+ * {@link Optional} models presence/absence, while {@code Try} models success/failure.
+ * A failure always carries the underlying error, making debugging and recovery explicit.
+ *
+ * <h2>Examples</h2>
+ *
+ * <h3>Capture exceptions from a supplier</h3>
+ * <pre>{@code
+ * Try<Integer> t = Try.of(() -> Integer.parseInt("123"));
+ * }</pre>
+ *
+ * <h3>Mapping</h3>
+ * <pre>{@code
+ * Try<Integer> length = Try.success("hello").map(String::length);
+ * }</pre>
+ *
+ * <h3>Flat-mapping (compose Try results)</h3>
+ * <pre>{@code
+ * Try<Integer> parsed =
+ *     Try.of(() -> "10")
+ *        .flatMap(s -> Try.of(() -> Integer.parseInt(s)));
+ * }</pre>
+ *
+ * <h3>Recover from failures</h3>
+ * <pre>{@code
+ * int v = Try.of(() -> Integer.parseInt("x"))
+ *            .recover(err -> 0)
+ *            .getOrElse(0);
+ * }</pre>
+ *
+ * <h3>Side-effects without breaking the pipeline</h3>
+ * <pre>{@code
+ * Try.of(() -> "data")
+ *    .peek(System.out::println)
+ *    .onFailure(Throwable::printStackTrace);
+ * }</pre>
+ *
+ * <h3>Try-with-resources helper</h3>
+ * <pre>{@code
+ * Function<InputStream, Try<String>> readAll =
+ *     Try.withResources(in -> new String(in.readAllBytes(), StandardCharsets.UTF_8));
+ * }</pre>
+ *
+ * <h2>Accessing values</h2>
+ * <ul>
+ *   <li>{@link #get()} returns the value for {@link Success} and throws for {@link Failure}.</li>
+ *   <li>{@link #getOrElse(Object)} provides a fallback value.</li>
+ *   <li>{@link #checkedGet()} rethrows the original checked exception when possible.</li>
+ * </ul>
+ *
+ * <h2>Design notes</h2>
+ * <ul>
+ *   <li>{@code Try} is immutable.</li>
+ *   <li>All transformations preserve failures automatically.</li>
+ *   <li>{@link Failure#get()} throws a dedicated unchecked exception for fast failure propagation.</li>
+ * </ul>
+ *
+ * @param <T> the success value type
+ *
+ * @see Success
+ * @see Failure
  */
 public abstract class Try<T> {
 
+
     private Try() { }
 
+    /**
+     * Creates a successful {@code Try} holding the given value.
+     */
     @Contract("_ -> new")
     public static <T> @NotNull Try<T> success(T value) {
         return new Success<>(value);
     }
 
+    /**
+     * Creates a failed {@code Try} holding the given error.
+     *
+     * @throws NullPointerException if {@code error} is null.
+     */
     @Contract("_ -> new")
     public static <T> @NotNull Try<T> failure(Throwable error) {
         return new Failure<>(Objects.requireNonNull(error, "error"));
     }
 
+    /**
+     * Executes the supplier and captures any thrown exception into a {@link Failure}.
+     *
+     * <p>
+     * {@link Error}s are rethrown to avoid masking fatal JVM errors.
+     */
     public static <T> Try<T> of(FailableSupplier<? extends T> supplier) {
         Objects.requireNonNull(supplier, "supplier");
 
@@ -67,6 +160,9 @@ public abstract class Try<T> {
         }
     }
 
+    /**
+     * Executes the runnable and captures any thrown exception into a {@link Failure}.
+     */
     public static Try<Void> run(FailableRunnable runnable) {
         Objects.requireNonNull(runnable, "runnable");
 
@@ -76,6 +172,13 @@ public abstract class Try<T> {
         });
     }
 
+    /**
+     * Returns a function that executes the given operation using try-with-resources,
+     * capturing failures into {@code Try}.
+     *
+     * <p>
+     * The returned function will close the resource automatically.
+     */
     @Contract(pure = true)
     public static <T extends AutoCloseable, R> @NotNull Function<T, Try<R>> withResources(
             Function<T, R> fn
@@ -95,16 +198,40 @@ public abstract class Try<T> {
         return (Try<T>) nested.flatMap(x -> (Try<T>) x);
     }
 
+    /**
+     * @return {@code true} if this instance represents {@link Success}.
+     */
     public abstract boolean isSuccess();
 
+    /**
+     * @return {@code true} if this instance represents {@link Failure}.
+     */
     public final boolean isFailure() {
         return !isSuccess();
     }
 
+    /**
+     * Returns the success value.
+     *
+     * @throws RuntimeException if this instance represents {@link Failure}.
+     */
     public abstract T get();
 
+    /**
+     * Returns the failure error if present.
+     *
+     * @return an optional containing the error for {@link Failure}, or empty for {@link Success}.
+     */
     public abstract Optional<Throwable> exception();
 
+    /**
+     * Returns the value if successful, otherwise rethrows the underlying error as:
+     * <ul>
+     *   <li>the same checked {@link Exception}, if applicable</li>
+     *   <li>the same {@link Error}, if applicable</li>
+     *   <li>otherwise wrapped in a {@link RuntimeException}</li>
+     * </ul>
+     */
     public final T checkedGet() throws Exception {
         if (isSuccess()) return get();
 
@@ -115,23 +242,47 @@ public abstract class Try<T> {
         throw new RuntimeException(t);
     }
 
+    /**
+     * Executes the given action if successful.
+     */
     public abstract void forEach(Consumer<? super T> action);
 
+    /**
+     * Maps the success value, preserving failures.
+     */
     public abstract <U> Try<U> map(Function<? super T, ? extends U> mapper);
 
+    /**
+     * Flat-maps the success value into another {@code Try}, preserving failures.
+     */
     public abstract <U> Try<U> flatMap(Function<? super T, ? extends Try<? extends U>> mapper);
 
+    /**
+     * Like {@link #map(Function)}, but allows checked exceptions inside the mapper.
+     */
     public final <U> Try<U> mapTry(FailableFunction<? super T, ? extends U> mapper) {
         Objects.requireNonNull(mapper, "mapper");
         return flatMap(v -> Try.of(() -> mapper.apply(v)));
     }
 
+    /**
+     * Converts {@link Success} into {@link Failure} if the predicate does not hold.
+     */
     public abstract Try<T> filter(Predicate<? super T> predicate);
 
+    /**
+     * Recovers from failure by converting the error into a fallback value.
+     */
     public abstract <U> Try<U> recover(Function<? super Throwable, ? extends U> recoverFunc);
 
+    /**
+     * Recovers from failure by converting the error into another {@code Try}.
+     */
     public abstract <U> Try<U> recoverWith(Function<? super Throwable, ? extends Try<? extends U>> recoverFunc);
 
+    /**
+     * Type-based recovery helper. Only recovers if the failure error is an instance of {@code type}.
+     */
     public final <E extends Throwable> Try<T> recover(
             Class<E> type,
             Function<? super E, ? extends T> recoverFunc
@@ -148,19 +299,39 @@ public abstract class Try<T> {
         return this;
     }
 
+    /**
+     * For {@link Failure}, returns {@link Success} containing the error.
+     * For {@link Success}, returns {@link Failure} indicating misuse.
+     */
     public abstract Try<Throwable> failed();
 
+    /**
+     * Converts a successful value into {@link Optional}; failures become {@link Optional#empty()}.
+     */
     public abstract Optional<T> toOptional();
 
+    /**
+     * Returns the value if successful, otherwise returns {@code defaultValue}.
+     */
     public abstract T getOrElse(T defaultValue);
 
+    /**
+     * Returns this instance if successful, otherwise returns {@code defaultValue}.
+     */
     public abstract Try<T> orElse(Try<? extends T> defaultValue);
 
+    /**
+     * Transforms this {@code Try} by providing handlers for both success and failure.
+     */
     public abstract <U> Try<U> transform(
             Function<? super T, ? extends Try<? extends U>> successFunc,
             Function<? super Throwable, ? extends Try<? extends U>> failureFunc
     );
 
+    /**
+     * Runs the given consumer if successful, returning the same successful value.
+     * If the consumer throws, the result becomes a {@link Failure}.
+     */
     public final Try<T> andThen(FailableConsumer<? super T> consumer) {
         Objects.requireNonNull(consumer, "consumer");
 
@@ -175,12 +346,18 @@ public abstract class Try<T> {
         return andThen((FailableConsumer<? super T>) consumer::accept);
     }
 
+    /**
+     * Like Stream.peek(): executes an action on success without changing the result.
+     */
     public final Try<T> peek(Consumer<? super T> action) {
         Objects.requireNonNull(action, "action");
         forEach(action);
         return this;
     }
 
+    /**
+     * Executes an action if this instance is a failure.
+     */
     public final Try<T> peekFailure(Consumer<? super Throwable> action) {
         Objects.requireNonNull(action, "action");
         exception().ifPresent(action);
@@ -191,6 +368,9 @@ public abstract class Try<T> {
         return peekFailure(action);
     }
 
+    /**
+     * Folds this result into a single value by mapping either success or failure.
+     */
     public final <U> U fold(
             Function<? super T, ? extends U> onSuccess,
             Function<? super Throwable, ? extends U> onFailure
@@ -203,6 +383,9 @@ public abstract class Try<T> {
                 : onFailure.apply(exception().orElse(null));
     }
 
+    /**
+     * Maps the error of a failure into another error.
+     */
     public final Try<T> mapFailure(Function<? super Throwable, ? extends Throwable> mapper) {
         Objects.requireNonNull(mapper, "mapper");
         if (isSuccess()) return this;
@@ -214,6 +397,9 @@ public abstract class Try<T> {
         return Try.failure(mapped);
     }
 
+    /**
+     * Returns the value if successful; otherwise throws a mapped {@link RuntimeException}.
+     */
     public final T getOrThrow(Function<? super Throwable, ? extends RuntimeException> mapper) {
         Objects.requireNonNull(mapper, "mapper");
         if (isSuccess()) return get();
@@ -225,6 +411,9 @@ public abstract class Try<T> {
         throw ex;
     }
 
+    /**
+     * Successful {@code Try} variant holding a value.
+     */
     public static final class Success<T> extends Try<T> {
 
         private final T value;
@@ -346,6 +535,11 @@ public abstract class Try<T> {
         }
     }
 
+    /**
+     * Failed {@code Try} variant holding an error.
+     * <p>
+     * Calling {@link #get()} throws {@link TryGetOrFailureException}.
+     */
     public static final class Failure<T> extends Try<T> {
 
         private final Throwable               error;

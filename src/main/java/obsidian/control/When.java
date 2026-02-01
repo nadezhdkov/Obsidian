@@ -16,18 +16,18 @@
 
 package obsidian.control;
 
-import obsidian.control.util.action.ActionWhen;
-import obsidian.control.util.action.ChooseChain;
-import obsidian.control.util.action.ChooseWhen;
-import obsidian.control.util.action.DecisionChain;
-import obsidian.control.util.match.MatchPattern;
 import obsidian.control.util.require.Preconditions;
-import org.jetbrains.annotations.NotNull;
+import obsidian.control.util.action.DecisionChain;
+import obsidian.control.util.action.ChooseChain;
+import obsidian.control.util.match.MatchPattern;
+import obsidian.control.util.action.ChooseWhen;
+import obsidian.control.util.action.ActionWhen;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.NotNull;
 
-import java.util.Objects;
-import java.util.Optional;
 import java.util.function.*;
+import java.util.Optional;
+import java.util.Objects;
 
 @SuppressWarnings("unused")
 public final class When {

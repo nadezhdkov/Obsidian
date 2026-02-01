@@ -4,7 +4,7 @@ Un framework Java moderno y minimalista con bibliotecas de utilidades poderosas 
 
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](../../../LICENSE.md)
 [![Java Version](https://img.shields.io/badge/java-11%2B-orange.svg)](https://www.java.com/)
-[![Maven Central](https://img.shields.io/badge/maven--central-1.0.0-brightgreen.svg)]()
+[![Maven Central](https://img.shields.io/badge/maven--central-1.0.0-brightgreen.svg)](https://central.sonatype.com/artifact/io.github.nadezhdkov/obsidian/overview)
 
 **📖 Idiomas Disponibles:** [English](../../../README.md) | [Português Brasileiro](../pt-BR/README.md) | [Deutsch](../de-DE/README.md) | [Español](./README.md)
 

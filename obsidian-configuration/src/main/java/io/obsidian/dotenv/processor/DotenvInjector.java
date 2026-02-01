@@ -16,7 +16,6 @@
 
 package io.obsidian.dotenv.processor;
 
-import io.dotenv.annotations.*;
 import io.obsidian.dotenv.annotations.*;
 import io.obsidian.dotenv.core.Dotenv;
 import io.obsidian.dotenv.processor.exception.DotenvInjectionException;

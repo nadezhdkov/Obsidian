@@ -88,3 +88,25 @@ daemon: wrapper-check
 # Ensures the gradlew script is executable
 wrapper-check:
 	@chmod +x $(GRADLEW)
+
+## Run performance benchmarks for Vector oVectorGet method
+benchmark:
+	@$(GRADLEW) :obsidian-collections-bench:jmh \
+        -Pjmh=VectorBenchmark.oVectorGet \
+        -Pjmh.warmupIterations=1 \
+        -Pjmh.measurementIterations=1
+
+## Run all performance benchmarks
+benchmarkAll:
+	@$(GRADLEW) ./obsidian-collections-bench/run-benchmarks.sh
+
+
+## Run precise performance benchmarks for ComparisonBenchmark
+benchmarkPrecise:
+	@$(GRADLEW) :obsidian-collections-bench:jmh \
+        -Pjmh=ComparisonBenchmark \
+        -Pjmh.forks=4 \
+        -Pjmh.warmupIterations=10 \
+        -Pjmh.measurementIterations=10
+
+# End of Makefile

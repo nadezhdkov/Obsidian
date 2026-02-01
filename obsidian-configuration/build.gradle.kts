@@ -8,5 +8,5 @@ dependencies {
 
     implementation(libs.gson)
     implementation(libs.annotations)
-    implementation(libs.yaml)
+//    implementation(libs.yaml)
 }

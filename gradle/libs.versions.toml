@@ -1,24 +1,32 @@
 [versions]
-junit            = "5.10.0"
-lombok           = "1.18.38"
-annotations      = "24.1.0"
-gson             = "2.13.2"
-jackson          = "2.20.0"
-jacksonannotaion = "3.0-rc5"
-dotenv           = "5.2.2"
-yaml             = "2.5"
-reflection       = "0.10.2"
-slf4j            = "2.0.17"
+junit       = "5.10.0"
+lombok      = "1.18.38"
+annotations = "24.1.0"
+gson        = "2.13.2"
+jackson     = "2.20.0"
+dotenv      = "5.2.2"
+yaml        = "2.5"
+reflections = "0.10.2"
+slf4j       = "2.0.17"
 
 [libraries]
-junit            = { module = "org.junit:junit-bom",                            version.ref = "junit"            }
-junitjupiter     = { module = "org.junit.jupiter:junit-jupiter",                version.ref = "junit"            }
-lombok           = { module = "org.projectlombok:lombok",                       version.ref = "lombok"           }
-annotations      = { module = "org.jetbrains:annotations",                      version.ref = "annotations"      }
-gson             = { module = "com.google.code.gson:gson",                      version.ref = "gson"             }
-jackson          = { module = "com.fasterxml.jackson.core:jackson-core",        version.ref = "jackson"          }
-jacksonannotaion = { module = "com.fasterxml.jackson.core:jackson-annotations", version.ref = "jacksonannotaion" }
-dotenv           = { module = "io.github.cdimascio:java-dotenv",                version.ref = "dotenv"           }
-yaml             = { module = "org.yaml:snakeyaml",                             version.ref = "yaml"             }
-reflection       = { module = "org.reflections:reflections",                    version.ref = "reflection"       }
-slf4j            = { module = "org.slf4j:slf4j-simple",                         version.ref = "slf4j" }
+junitBom           = { module = "org.junit:junit-bom",                            version.ref = "junit"       }
+junitJupiter       = { module = "org.junit.jupiter:junit-jupiter" }
+
+lombok             = { module = "org.projectlombok:lombok",                       version.ref = "lombok"      }
+annotations        = { module = "org.jetbrains:annotations",                      version.ref = "annotations" }
+
+gson               = { module = "com.google.code.gson:gson",                      version.ref = "gson"        }
+snakeyaml          = { module = "org.yaml:snakeyaml",                             version.ref = "yaml"        }
+
+jacksonCore        = { module = "com.fasterxml.jackson.core:jackson-core",        version.ref = "jackson"     }
+jacksonAnnotations = { module = "com.fasterxml.jackson.core:jackson-annotations", version.ref = "jackson"     }
+
+dotenv             = { module = "io.github.cdimascio:java-dotenv",                version.ref = "dotenv"      }
+reflections        = { module = "org.reflections:reflections",                    version.ref = "reflections" }
+
+slf4jSimple        = { module = "org.slf4j:slf4j-simple",                         version.ref = "slf4j"       }
+
+[bundles]
+junit = ["junitJupiter"]
+jackson = ["jacksonCore", "jacksonAnnotations"]
