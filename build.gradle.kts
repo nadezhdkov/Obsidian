@@ -5,6 +5,10 @@ plugins {
     id("signing")
 }
 
+group = "io.obsidian"
+version = "1.0.0-SNAPSHOT"
+
+
 repositories {
     mavenCentral()
 }
@@ -99,6 +103,10 @@ subprojects {
     apply(plugin = "maven-publish")
     apply(plugin = "com.vanniktech.maven.publish")
     apply(plugin = "signing")
+
+    group = "io.obsidian"
+    version = "1.0.0-SNAPSHOT"
+
 
     repositories {
         mavenCentral()

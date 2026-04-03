@@ -3,10 +3,13 @@
   <p><b>A modern, minimalist, and robust Java 21+ framework.</b></p>
   <p><i>Focused on developer ergonomics, offering advanced reflection, flexible configuration, concurrency abstractions, and high-quality utility APIs.</i></p>
 
-  [![Java Version](https://img.shields.io/badge/Java-21+-orange.svg)](https://www.java.com/)
-  [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE.md)
-  [![Maven Central](https://img.shields.io/badge/Maven_Central-v1.0.0--SNAPSHOT-brightgreen.svg)](#)
-  [![GitHub Packages](https://img.shields.io/badge/GitHub_Packages-Available-blueviolet)](#)
+  <p align="center">
+    <img src="https://img.shields.io/badge/Java-21+-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white" alt="Java 21+"/>
+    <img src="https://img.shields.io/badge/Gradle-02303A?style=for-the-badge&logo=gradle&logoColor=white" alt="Gradle"/>
+    <img src="https://img.shields.io/badge/Apache_2.0-D22128?style=for-the-badge&logo=apache&logoColor=white" alt="License"/>
+    <img src="https://img.shields.io/badge/GitHub_Packages-181717?style=for-the-badge&logo=github&logoColor=white" alt="GitHub Packages"/>
+    <img src="https://img.shields.io/badge/Maven_Central-C71A36?style=for-the-badge&logo=apachemaven&logoColor=white" alt="Maven Central"/>
+  </p>
 </div>
 
 ---
