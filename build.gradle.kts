@@ -1,5 +1,6 @@
 plugins {
     id("java-library")
+    id("maven-publish")
     id("com.vanniktech.maven.publish") version "0.34.0"
     id("signing")
 }
@@ -30,6 +31,9 @@ dependencies {
     testImplementation(libs.junitJupiter)
 }
 
+// ─────────────────────────────────────────────────────
+// Maven Central (via Vanniktech)
+// ─────────────────────────────────────────────────────
 mavenPublishing {
     publishToMavenCentral()
     signAllPublications()
@@ -70,8 +74,25 @@ mavenPublishing {
     }
 }
 
+// ─────────────────────────────────────────────────────
+// GitHub Packages
+// ─────────────────────────────────────────────────────
+publishing {
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/nadezhdkov/Obsidian")
+            credentials {
+                username = project.findProperty("gpr.user") as String? ?: System.getenv("USERNAME")
+                password = project.findProperty("gpr.key") as String? ?: System.getenv("TOKEN")
+            }
+        }
+    }
+}
+
 subprojects {
     apply(plugin = "java-library")
+    apply(plugin = "maven-publish")
     apply(plugin = "com.vanniktech.maven.publish")
     apply(plugin = "signing")
 
@@ -97,6 +118,7 @@ subprojects {
     dependencies {
         testImplementation(platform(rootProject.libs.junitBom))
         testImplementation(rootProject.libs.junitJupiter)
+        testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
         compileOnly(rootProject.libs.lombok)
         annotationProcessor(rootProject.libs.lombok)
@@ -104,6 +126,9 @@ subprojects {
         implementation(rootProject.libs.annotations)
     }
 
+    // ─────────────────────────────────────────────────────
+    // Maven Central (via Vanniktech) — Subprojects
+    // ─────────────────────────────────────────────────────
     mavenPublishing {
         publishToMavenCentral()
         signAllPublications()
@@ -139,6 +164,22 @@ subprojects {
                 url.set("https://github.com/nadezhdkov/Obsidian")
                 connection.set("scm:git:https://github.com/nadezhdkov/Obsidian.git")
                 developerConnection.set("scm:git:ssh://git@github.com/nadezhdkov/Obsidian.git")
+            }
+        }
+    }
+
+    // ─────────────────────────────────────────────────────
+    // GitHub Packages — Subprojects
+    // ─────────────────────────────────────────────────────
+    publishing {
+        repositories {
+            maven {
+                name = "GitHubPackages"
+                url = uri("https://maven.pkg.github.com/nadezhdkov/Obsidian")
+                credentials {
+                    username = project.findProperty("gpr.user") as String? ?: System.getenv("USERNAME")
+                    password = project.findProperty("gpr.key") as String? ?: System.getenv("TOKEN")
+                }
             }
         }
     }

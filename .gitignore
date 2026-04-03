@@ -1,0 +1,77 @@
+# ===========================
+# Compiled & Build Outputs
+# ===========================
+build/
+out/
+bin/
+*.class
+*.jar
+*.war
+*.ear
+
+# ===========================
+# Gradle
+# ===========================
+.gradle/
+**/build/
+
+# Gradle Wrapper (optional — keep if you want wrapper in repo)
+# !gradle/wrapper/gradle-wrapper.jar
+# !gradle/wrapper/gradle-wrapper.properties
+
+# ===========================
+# Sensitive / Credentials
+# ===========================
+gradle.properties
+local.properties
+*.jks
+*.keystore
+*.p12
+*.pem
+*.key
+
+# GPG / Signing
+secring.gpg
+secring.pgp
+
+# ===========================
+# IDE — IntelliJ IDEA
+# ===========================
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# ===========================
+# IDE — Eclipse
+# ===========================
+.classpath
+.project
+.settings/
+
+# ===========================
+# IDE — VS Code
+# ===========================
+.vscode/
+
+# ===========================
+# OS Files
+# ===========================
+.DS_Store
+Thumbs.db
+Desktop.ini
+ehthumbs.db
+
+# ===========================
+# Logs
+# ===========================
+*.log
+hs_err_pid*
+replay_pid*
+
+# ===========================
+# Environment / Secrets
+# ===========================
+.env
+.env.*
+!.env.example
