@@ -1,462 +1,193 @@
-# 🔮 Obsidian
+<div align="center">
+  <h1>🔮 Obsidian Framework</h1>
+  <p><b>A modern, minimalist, and robust Java 21+ framework.</b></p>
+  <p><i>Focused on developer ergonomics, offering advanced reflection, flexible configuration, concurrency abstractions, and high-quality utility APIs.</i></p>
 
-A modern and minimalist Java framework with powerful utility libraries to simplify common development tasks.
+  [![Java Version](https://img.shields.io/badge/Java-21+-orange.svg)](https://www.java.com/)
+  [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE.md)
+  [![Maven Central](https://img.shields.io/badge/Maven_Central-v1.0.0--SNAPSHOT-brightgreen.svg)](#)
+  [![GitHub Packages](https://img.shields.io/badge/GitHub_Packages-Available-blueviolet)](#)
+</div>
 
-[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE.md)
-[![Java Version](https://img.shields.io/badge/java-11%2B-orange.svg)](https://www.java.com/)
-[![Maven Central](https://img.shields.io/badge/maven--central-1.0.0-brightgreen.svg)](https://central.sonatype.com/artifact/io.github.nadezhdkov/obsidian/overview)
+---
 
 **📖 Available Languages:** [English](./README.md) | [Português Brasileiro](./docs/i18n/pt-BR/README.md) | [Deutsch](./docs/i18n/de-DE/README.md) | [Español](./docs/i18n/es-ES/README.md)
 
-## 📚 About
+## 📌 Overview
 
-Obsidian is a collection of independent and highly specialized modules that make Java development easier. Each module is designed to solve specific problems with a clear, fluent, and easy-to-use API.
+Obsidian is a collection of elegant, independent, and highly specialized Java modules that simplify backend development. Each module is designed to solve specific problems with a fluent, intuitive API, minimizing boilerplate and maximizing type safety.
 
-### Available Modules
+Built for **Java 21**, Obsidian leverages modern language features to deliver a seamless developer experience.
 
-#### 🔧 [Obsidian Configuration](docs/subproject/dotenv/dotenv_readme.md)
+## ✨ Core Modules
 
-Minimalist **annotations** system to map environment variables (`.env`) to Java fields.
+### ⚙️ [Obsidian Configuration](docs/subproject/dotenv/dotenv_readme.md)
+A minimalist, annotation-driven system for mapping environment variables (`.env`) directly to Java fields.
+- **Automatic mapping** and type conversion
+- **Default values** and required validation
+- Clean and intuitive API
 
-**Features:**
-- ✅ Automatic environment variable mapping
-- ✅ Default values support
-- ✅ Required variables validation
-- ✅ Automatic prefixes
-- ✅ Automatic type conversion
-- ✅ Ignore specific fields
-
-**Quick Example:**
 ```java
-@Env("DATABASE_URL")
+@Env("DB_URL")
+@RequiredEnv
 String dbUrl;
 
 @Env("PORT")
 @Default("8080")
 int port;
-
-@RequiredEnv
-@Env("API_KEY")
-String apiKey;
 ```
 
-#### 🔬 [Obsidian Reflection](docs/subproject/reflect/reflect_readme.md)
+### 🪞 [Obsidian Reflection](docs/subproject/reflect/reflect_readme.md)
+A fluent and powerful API that makes working with java.lang.reflect safe and intuitive.
+- Chainable, builder-pattern reflection
+- Semantic filters for methods and fields
+- Simple instantiation without boilerplate
 
-Fluent and powerful API for working with reflection in Java in a simple and intuitive way.
-
-**Features:**
-- ✅ Fluent API with method chaining
-- ✅ Powerful filters for fields and methods
-- ✅ Type-safe whenever possible
-- ✅ Built-in builder pattern
-- ✅ Easy annotation manipulation
-- ✅ Zero boilerplate code
-
-**Quick Example:**
 ```java
-// Access fields
-Reflect.on(User.class)
-    .fields()
-    .named("name")
-    .set(user, "John");
-
-// Invoke methods
+// Invoke all getters effortlessly
 Reflect.on(user)
     .methods()
     .getters()
     .each(System.out::println);
-
-// Create instances
-User user = Reflect.on(User.class).newInstance("John", 30);
 ```
 
-#### 🔄 [Obsidian Promise](docs/subproject/promise/README.md)
+### ⏳ [Obsidian Promise](docs/subproject/promise/README.md)
+Modern, functional asynchronous computation built on top of Java concurrency.
+- Thread-safe, immutable futures
+- Advanced functional composition (`map`, `flatMap`)
+- Robust error recovery and timeout management
 
-Modern asynchronous computation API for handling async operations with elegant composition and error handling.
-
-**Features:**
-- ✅ Immutable and thread-safe promises
-- ✅ Functional composition (map, flatMap, filter)
-- ✅ Robust error handling (recover, recoverWith, catchError)
-- ✅ Timeout and retry support
-- ✅ Cancellation with tokens
-- ✅ Promise combinators (all, any, race)
-
-**Quick Example:**
 ```java
-Promise<User> user = loadUser(userId)
-    .timeout(Duration.ofSeconds(10))
+Promise<User> user = loadUser(id)
+    .timeout(Duration.ofSeconds(5))
     .retry(3)
-    .flatMap(u -> loadPreferences(u.getId()))
-    .recover(e -> User.empty());
-
-user.onSuccess(u -> System.out.println("User: " + u))
-    .onError(e -> System.err.println("Failed: " + e));
+    .recover(e -> User.guest());
 ```
 
-#### 📦 [Obsidian Functional](docs/package/functional/README.md)
+### 🧩 [Obsidian Collections & Core](#)
+High-performance fundamental utilities, functional tools, and advanced data structures.
+- **Try<T>** for elegant error handling without `try/catch` hell
+- **Box<T>** thread-safe mutable state containers (Atomic, Volatile, Plain)
+- **When API** for fluent conditional chains and pattern matching
 
-Functional programming utilities including Try<T> for error handling and Failable interfaces.
-
-**Features:**
-- ✅ Try<T> for functional error handling
-- ✅ Failable interfaces (Consumer, Function, Supplier, Runnable)
-- ✅ Elegant failure chaining
-- ✅ Type-safe operations
-- ✅ Interop with Java Streams
-
-**Quick Example:**
 ```java
-Try<Integer> result = Try.of(() -> Integer.parseInt("123"))
+Try<Integer> score = Try.of(() -> parseScore())
     .map(n -> n * 2)
-    .filter(n -> n > 100)
     .recover(e -> 0);
 
-result.ifSuccess(System.out::println)
-    .ifFailure(e -> System.err.println(e.getMessage()));
-```
-
-#### 🎛️ [Obsidian Control](docs/package/control/README.md)
-
-Fluent conditional expressions and pattern matching utilities (When API).
-
-**Features:**
-- ✅ Fluent condition building
-- ✅ Pattern matching with match()
-- ✅ Precondition validation
-- ✅ Chainable decisions
-- ✅ Lazy evaluation
-
-**Quick Example:**
-```java
-String message = When.choose(
-    age >= 18,
-    () -> "Adult access",
-    () -> "Restricted access"
-);
-
-When.chain()
-    .when(status == PENDING)
-    .then(() -> processOrder())
-    .when(status == SHIPPED)
-    .then(() -> notifyUser())
+When.when(user.isPremium())
+    .then(() -> applyDiscount())
     .execute();
 ```
 
-#### 🔄 [Obsidian Concurrent](docs/package/concurrent/README.md)
+---
 
-Thread-safe mutable containers with different synchronization strategies.
+## 🚀 Installation & Quick Start
 
-**Features:**
-- ✅ AtomicBox with CAS operations
-- ✅ VolatileBox for visibility
-- ✅ PlainBox for single-threaded
-- ✅ Box views (read-only transforms)
-- ✅ Atomic updates and transformations
+Obsidian is modular. You can import the entire framework or just the modules you need.
+**Artifact Group:** `io.obsidian`
 
-**Quick Example:**
-```java
-Box<Integer> counter = Box.atomic(0);
+### Maven Configuration
 
-// Atomic operations
-counter.compareAndSet(0, 1);
-counter.updateAndGet(n -> n + 1);
+Add the dependencies to your `pom.xml`:
 
-// Views
-Box<String> view = counter.view(String::valueOf);
-```
-
-#### ⚡ [Obsidian Stream](docs/package/stream/README.md)
-
-Utility classes for sequences and ranges with lazy evaluation.
-
-**Features:**
-- ✅ Sequence<T> for lazy stream-like operations
-- ✅ Range utilities for numeric sequences
-- ✅ Efficient transformations
-- ✅ Fluent API
-
-**Quick Example:**
-```java
-Sequence<Integer> nums = Range.from(1).to(100)
-    .map(n -> n * 2)
-    .filter(n -> n % 3 == 0);
-
-nums.forEach(System.out::println);
-```
-
-## 🚀 Quick Start
-
-### Installation
-
-#### Maven
 ```xml
-<dependency>
-    <groupId>obsidian.lib</groupId>
-    <artifactId>obsidian-configuration</artifactId>
-    <version>1.0.0</version>
-</dependency>
-
-<dependency>
-    <groupId>obsidian.lib</groupId>
-    <artifactId>obsidian-reflection</artifactId>
-    <version>1.0.0</version>
-</dependency>
-
-<dependency>
-    <groupId>obsidian.lib</groupId>
-    <artifactId>obsidian-promise</artifactId>
-    <version>1.0.0</version>
-</dependency>
-
-<dependency>
-    <groupId>obsidian.lib</groupId>
-    <artifactId>obsidian-core</artifactId>
-    <version>1.0.0</version>
-</dependency>
+<dependencies>
+    <dependency>
+        <groupId>io.obsidian</groupId>
+        <artifactId>obsidian</artifactId> <!-- Core Module -->
+        <version>1.0.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+        <groupId>io.obsidian</groupId>
+        <artifactId>obsidian-configuration</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+    </dependency>
+    <!-- Add other modules: obsidian-reflection, obsidian-promise, obsidian-collections -->
+</dependencies>
 ```
 
-#### Gradle
-```gradle
-implementation 'obsidian.lib:obsidian-configuration:1.0.0'
-implementation 'obsidian.lib:obsidian-reflection:1.0.0'
-implementation 'obsidian.lib:obsidian-promise:1.0.0'
-implementation 'obsidian.lib:obsidian-core:1.0.0'
-```
+### Gradle Configuration (Kotlin DSL)
 
-### Complete Example
-
-```java
-import io.dotenv.annotations.Env;
-import io.dotenv.annotations.Default;
-import io.dotenv.core.Dotenv;
-import lang.reflect.Reflect;
-import io.obsidian.promise.api.Promise;
-import io.obsidian.promise.api.Promises;
-import obsidian.control.When;
-import obsidian.util.concurrent.Box;
-
-public class Application {
-    
-    @Env("APP_NAME")
-    @Default("MyApp")
-    String appName;
-    
-    @Env("PORT")
-    @Default("8080")
-    int port;
-    
-    public static void main(String[] args) {
-        // Load configuration from .env
-        Application app = new Application();
-        Dotenv.load(app);
-        
-        // Use reflection to inspect application
-        Reflect.on(app)
-            .fields()
-            .each(f -> System.out.println(f.getName() + " = " + f.get(app)));
-        
-        // Use promises for async operations
-        loadUserData(1)
-            .timeout(Duration.ofSeconds(5))
-            .retry(2)
-            .onSuccess(user -> System.out.println("Loaded: " + user))
-            .onError(e -> System.err.println("Error: " + e.getMessage()));
-        
-        // Use When for fluent conditions
-        When.when(app.port > 0)
-            .then(() -> System.out.println("Port is valid: " + app.port))
-            .execute();
-        
-        // Use Box for thread-safe values
-        Box<Integer> counter = Box.atomic(0);
-        counter.updateAndGet(c -> c + 1);
-        System.out.println("Counter: " + counter.get());
-    }
+```kotlin
+dependencies {
+    implementation("io.obsidian:obsidian:1.0.0-SNAPSHOT")
+    implementation("io.obsidian:obsidian-configuration:1.0.0-SNAPSHOT")
+    implementation("io.obsidian:obsidian-reflection:1.0.0-SNAPSHOT")
+    implementation("io.obsidian:obsidian-promise:1.0.0-SNAPSHOT")
 }
 ```
 
-## 📖 Documentation
+### 🔑 Using GitHub Packages
 
-- [Obsidian Configuration - Complete Documentation](docs/subproject/dotenv/dotenv_readme.md)
-- [Obsidian Reflection - Complete Documentation](docs/subproject/reflect/reflect_readme.md)
-- [Obsidian Promise - Complete Documentation](docs/subproject/promise/README.md)
-- [JSON Architecture](docs/subproject/json/json_architecture_and_design.md)
-- [Try<T> - Functional Error Handling](docs/package/functional/README.md)
-- [When - Fluent Conditionals](docs/package/control/README.md)
-- [Box<T> - Thread-Safe Containers](docs/package/concurrent/README.md)
-- [Sequence<T> - Lazy Streams](docs/package/stream/README.md)
+Obsidian is published to GitHub Packages. To pull Obsidian modules via GitHub Packages, authenticate your Gradle/Maven build using your GitHub Personal Access Token (PAT).
 
-## 🛠️ Development
-
-### Requirements
-
-- **Java 11** or higher
-- **Gradle 7.0** or higher
-- **Make** (optional, for using Makefile commands)
-
-### Build the Project
-
-```bash
-# Complete build
-make build
-
-# Run tests
-make test
-
-# Clean build
-make clean
-
-# Generate documentation
-make javadoc
-
-# Publish locally
-make local
+**For Gradle (`build.gradle.kts`):**
+```kotlin
+repositories {
+    mavenCentral()
+    maven {
+        url = uri("https://maven.pkg.github.com/nadezhdkov/Obsidian")
+        credentials {
+            username = project.findProperty("gpr.user") as String? ?: System.getenv("USERNAME")
+            password = project.findProperty("gpr.key") as String? ?: System.getenv("TOKEN")
+        }
+    }
+}
 ```
-
-Or using Gradle directly:
-
-```bash
-# Build
-./gradlew build
-
-# Tests
-./gradlew test
-
-# Check
-./gradlew check
-```
-
-### Project Structure
-
-```
-Obsidian/
-├── obsidian-configuration/   # Configuration and .env module
-│   ├── src/main/java/
-│   │   └── io/dotenv/
-│   │       ├── annotations/   # Annotations @Env, @Default, etc
-│   │       ├── core/          # Core implementation
-│   │       ├── processor/     # Processors
-│   │       └── util/          # Utilities
-│   └── build.gradle.kts
-│
-├── obsidian-reflection/      # Reflection module
-│   ├── src/main/java/
-│   │   └── lang/reflect/
-│   │       ├── Reflect*.java  # Main classes
-│   │       └── exception/     # Exceptions
-│   └── build.gradle.kts
-│
-├── obsidian-promise/         # Promise module
-│   ├── src/main/java/
-│   │   └── io/obsidian/promise/
-│   │       ├── api/           # Promise API
-│   │       ├── combinators/   # Promise combinators
-│   │       ├── error/         # Error handling
-│   │       └── internal/      # Internal implementation
-│   └── build.gradle.kts
-│
-├── src/main/java/obsidian/  # Core utilities
-│   ├── control/              # When and control flow
-│   ├── functional/           # Try<T> and functional utilities
-│   ├── util/                 # Box<T>, Sequence<T>, Range
-│   │   ├── concurrent/       # Thread-safe containers
-│   │   └── stream/           # Stream utilities
-│   └── api/                  # Core APIs
-│
-├── docs/                     # Documentation
-├── gradle/                   # Gradle wrapper
-├── build.gradle.kts          # Root build config
-├── settings.gradle.kts       # Subproject configuration
-├── Makefile                  # Development targets
-└── README.md                 # This file
-```
-
-## 📦 Dependencies
-
-- **JetBrains Annotations** - Annotations for better code analysis
-- **Gson** - JSON serialization
-- **YAML** - YAML support
-- **Lombok** - Boilerplate reduction
-- **JUnit 5** - Testing framework
-
-## 🤝 Contributing
-
-Contributions are welcome! To contribute:
-
-1. Fork the project
-2. Create a branch for your feature (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-## 📄 License
-
-This project is licensed under the [Apache License 2.0](LICENSE.md) - see the license file for details.
-
-## 👨‍💻 Author
-
-Developed with ❤️ by Nadezhda
-
-## 🎯 Roadmap
-
-- [ ] Advanced YAML support
-- [ ] Intelligent reflection caching
-- [ ] Automatic field validation
-- [ ] Spring Framework integration
-- [ ] Dedicated Gradle plugin
-- [ ] Multi-language documentation
-
-## 💡 Tips & Tricks
-
-### Using Dotenv with Reflection
-
-```java
-@Env("DB_HOST")
-String host;
-
-// Access all fields annotated with @Env
-Reflect.on(this)
-    .fields()
-    .annotated(Env.class)
-    .each(f -> System.out.println(f.getName()));
-```
-
-### Filtering Methods
-
-```java
-// Find all getters
-List<Method> getters = Reflect.on(User.class)
-    .methods()
-    .getters()
-    .list();
-
-// Custom filters
-Reflect.on(service)
-    .methods()
-    .isPublic()
-    .notStatic()
-    .startWith("handle")
-    .each(method -> /* process */);
-```
-
-## 🐛 Report Issues
-
-Found a bug? Please open an [issue](https://github.com/nadezhdkov/obsidian/issues) with:
-
-- Clear problem description
-- Steps to reproduce
-- Expected vs actual behavior
-- Java and Obsidian version
-
-## 📞 Support
-
-For additional support:
-
-- 📧 Email: seu-email@exemplo.com
-- 💬 GitHub Issues
-- 📚 Check the complete documentation in the `/doc` folders
+*(Store `gpr.user` and `gpr.key` securely in your `~/.gradle/gradle.properties`)*
 
 ---
 
-**Developed with ❤️ using Java and Gradle**
+## 🏗️ Development & Building
+
+The project is structured as a multi-module Gradle build, requiring **Java 21**.
+
+```bash
+# Clone the repository
+git clone https://github.com/nadezhdkov/Obsidian.git
+cd Obsidian
+
+# Compile and Build
+./gradlew build
+
+# Run all test suites
+./gradlew test
+
+# Publish to local Maven repository
+./gradlew publishToMavenLocal
+```
+
+### Project Structure
+- `obsidian-configuration`: Environment variable mapping framework
+- `obsidian-reflection`: Fluent Reflection API
+- `obsidian-promise`: Async processing utilities
+- `obsidian-collections`: Specialized collections and data streams
+- `src/main/java/obsidian`: Core framework (Functional interfaces, Control Flow, Concurrent utilities)
+
+---
+
+## 🤝 Contributing
+
+We welcome community contributions! Please read our guidelines to get started:
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Verify your code with `./gradlew build`
+5. Push to the branch (`git push origin feature/amazing-feature`)
+6. Open a Pull Request
+
+## 🐛 Issues & Support
+
+Found an issue or have a feature request? Let us know!
+- Create a [bug report](https://github.com/nadezhdkov/Obsidian/issues) on GitHub.
+- For usage queries, check out the documentation in the `/docs` directory.
+
+## 📄 License
+
+Obsidian is completely open-source and released under the [Apache License 2.0](LICENSE.md).
+
+<div align="center">
+  <b>Developed with ❤️ using modern Java</b>
+</div>
