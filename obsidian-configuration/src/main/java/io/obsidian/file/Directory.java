@@ -16,6 +16,8 @@
 
 package io.obsidian.file;
 
+import io.obsidian.file.exception.FileOperationException;
+import io.obsidian.file.exception.FileWriteException;
 import lombok.Getter;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -30,6 +32,14 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+/**
+ * Fluent directory operations: create, list, clean, and recursive delete.
+ *
+ * <p>All failure modes throw typed {@link FileOperationException} subtypes
+ * instead of generic {@code RuntimeException}.</p>
+ *
+ * @since 1.0
+ */
 public class Directory {
 
     @Getter
@@ -49,12 +59,18 @@ public class Directory {
         return new Directory(Objects.requireNonNull(path).toString());
     }
 
+    /**
+     * Creates the directory (and parents) if it doesn't exist.
+     *
+     * @return this instance for fluent chaining
+     * @throws FileWriteException if creation fails
+     */
     public Directory create() {
         if (Files.notExists(path)) {
             try {
                 Files.createDirectories(path);
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                throw new FileWriteException("Failed to create directory: " + path, e, path);
             }
         }
         return this;
@@ -64,33 +80,57 @@ public class Directory {
         return Files.exists(path) && Files.isDirectory(path);
     }
 
+    /**
+     * Checks whether the directory is empty.
+     *
+     * @return {@code true} if the directory has no children
+     * @throws FileWriteException if listing fails
+     */
     public boolean isEmpty() {
         if (!exists()) return true;
         try (var entries = Files.list(path)) {
             return entries.findAny().isEmpty();
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new FileWriteException("Failed to list directory: " + path, e, path);
         }
     }
 
+    /**
+     * Lists all direct children of the directory.
+     *
+     * @return list of child paths
+     * @throws FileWriteException if listing fails
+     */
     public List<Path> list() {
         try (var stream = Files.list(path)) {
             return stream.collect(Collectors.toList());
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new FileWriteException("Failed to list directory: " + path, e, path);
         }
     }
 
+    /**
+     * Lists all direct children names of the directory.
+     *
+     * @return list of child file/directory names
+     * @throws FileWriteException if listing fails
+     */
     public List<String> listNames() {
         try (var stream = Files.list(path)) {
             return stream
                     .map(p -> p.getFileName().toString())
                     .collect(Collectors.toList());
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new FileWriteException("Failed to list directory names: " + path, e, path);
         }
     }
 
+    /**
+     * Deletes the directory and all its contents recursively.
+     *
+     * @return this instance for fluent chaining
+     * @throws FileWriteException if deletion fails
+     */
     public Directory deleteRecursively() {
         if (Files.notExists(path)) return this;
 
@@ -98,11 +138,17 @@ public class Directory {
             walk.sorted(Comparator.reverseOrder())
                     .forEach(this::deletePathUnchecked);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new FileWriteException("Failed to delete directory recursively: " + path, e, path);
         }
         return this;
     }
 
+    /**
+     * Removes all contents of the directory without deleting the directory itself.
+     *
+     * @return this instance for fluent chaining
+     * @throws FileWriteException if cleaning fails
+     */
     public Directory clean() {
         if (Files.notExists(path)) return this;
 
@@ -115,7 +161,7 @@ public class Directory {
                 }
             });
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new FileWriteException("Failed to clean directory: " + path, e, path);
         }
         return this;
     }

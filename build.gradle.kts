@@ -34,9 +34,13 @@ dependencies {
 // ─────────────────────────────────────────────────────
 // Maven Central (via Vanniktech)
 // ─────────────────────────────────────────────────────
+val hasSigningKey = project.hasProperty("signing.gnupg.keyName") ||
+    project.hasProperty("signing.keyId") ||
+    System.getenv("ORG_GRADLE_PROJECT_signingKey") != null
+
 mavenPublishing {
     publishToMavenCentral()
-    signAllPublications()
+    if (hasSigningKey) signAllPublications()
 
     coordinates(
         project.group.toString(),
@@ -129,9 +133,13 @@ subprojects {
     // ─────────────────────────────────────────────────────
     // Maven Central (via Vanniktech) — Subprojects
     // ─────────────────────────────────────────────────────
+    val hasSigningKey = project.hasProperty("signing.gnupg.keyName") ||
+        project.hasProperty("signing.keyId") ||
+        System.getenv("ORG_GRADLE_PROJECT_signingKey") != null
+
     mavenPublishing {
         publishToMavenCentral()
-        signAllPublications()
+        if (hasSigningKey) signAllPublications()
 
         coordinates(
             project.group.toString(),
